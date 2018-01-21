@@ -44,8 +44,13 @@ public class VideoGenTestJava1 {
 	private static final String FFMPEG_SUFFIX_NOSOUND_CMD = " -hide_banner 2>&1 | grep Audio | awk '{print $0}' | tr -d ,";
 
 	private static final String FFMPEG_SUFFIX_APPEND_NULL_SOUND_CMD = " -f lavfi -i anullsrc -c:v copy -c:a aac -strict -2 -shortest ";
-			
-
+	
+	private static final String GIF_OUTPUT_FOLDER = "gif/";
+	private static final String GIF_INPUT = "output_video.mp4";
+	
+	
+	
+	
 //	private Process runCommandInterpretedMode(String command) {
 //		Process p = null;
 //		try {
@@ -129,7 +134,7 @@ public class VideoGenTestJava1 {
 	}
 	
 	
-	@Test
+	//@Test
 	public void testNbVariante() {
 		int max = 7;
 		for (int i = 1; i <= max; i++) {
@@ -141,7 +146,7 @@ public class VideoGenTestJava1 {
 	}
 
 	
-	@Test
+	//@Test
 	public void testNbVarianteCSV() {
 		// CSV
 		String csvName = "CSV-videogen-sample - Sheet1.csv"; // CSV for example2
@@ -160,7 +165,7 @@ public class VideoGenTestJava1 {
 	}
 
 	
-	@Test
+	//@Test
 	public void testInterpretedModeWithVLC() throws InterruptedException, IOException {
 
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
@@ -223,7 +228,7 @@ public class VideoGenTestJava1 {
 	}
 
 	
-	@Test
+	//@Test
 	public void testCompiledModeWithFFMPEG() throws InterruptedException, IOException {
 
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
@@ -305,7 +310,7 @@ public class VideoGenTestJava1 {
 	}
 
 	
-	@Test
+	//@Test
 	public void testVarianteDePlusLongueDuree() throws InterruptedException, IOException {
 
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
@@ -388,7 +393,7 @@ public class VideoGenTestJava1 {
 	}
 	
 	
-	@Test
+	//@Test
 	public void testFfmpegCompileVariantes() throws IOException {
 		compileVariantes(listeDeToutesLesVariantes());
 	}
@@ -427,7 +432,7 @@ public class VideoGenTestJava1 {
 	}
 	
 	
-	@Test
+	//@Test
 	public void testFfmpegDureesVariantes() throws IOException {
 		dureesVariantes(listeDeToutesLesVariantes());
 	}
@@ -473,7 +478,7 @@ public class VideoGenTestJava1 {
 	}
 	
 	
-	@Test
+	//@Test
 	public void calculerTaillesVariantes() throws IOException {
 		
 		// CSV File
@@ -734,7 +739,7 @@ public class VideoGenTestJava1 {
 	}
 	
 	
-	@Test
+	//@Test
 	public void testPagePourAfficherVignettes() throws IOException {
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
 		assertNotNull(videoGen);
@@ -835,7 +840,7 @@ public class VideoGenTestJava1 {
 	}
 	
 	
-	@Test
+	//@Test
 	public void testGenerateurDeVignette() {
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
 		assertNotNull(videoGen);
@@ -954,7 +959,7 @@ public class VideoGenTestJava1 {
 	
 	
 	
-	@Test
+	//@Test
 	public void testErreursVideoGen() throws IOException {
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
 		assertNotNull(videoGen);
@@ -1016,5 +1021,18 @@ public class VideoGenTestJava1 {
 		
 	}
 	
+	//Génère un fichier gif à partir d'une video
+	//scale : largeur en pixels du gif. Le rapport hauteur/largeur est préservé
+	//fps : file per second. Fréquence de prélèvement des images dans la video pour réaliser le gif.
+	@Test
+	public void gifWithFfmpeg(int scale, int fps) throws IOException {
+		
+		String cmd1 = "ffmpeg -i " + GIF_INPUT + " -vf scale=" + scale + ":-1:flags=lanczos,fps=" + fps + " " + GIF_OUTPUT_FOLDER + "ffout%03d.png";
+		String cmd2 = "convert -loop 0 " + GIF_OUTPUT_FOLDER + "ffout*.png " + GIF_OUTPUT_FOLDER + "output.gif";
+		
+		runCommandInterpretedMode(cmd1, true);
+		runCommandInterpretedMode(cmd2, true);
+		
+	}
 	
 }
