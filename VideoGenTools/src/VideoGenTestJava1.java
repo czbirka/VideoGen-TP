@@ -1,5 +1,6 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -127,6 +128,7 @@ public class VideoGenTestJava1 {
 		return variantes;
 	}
 	
+	
 	@Test
 	public void testNbVariante() {
 		int max = 7;
@@ -138,6 +140,7 @@ public class VideoGenTestJava1 {
 		}
 	}
 
+	
 	@Test
 	public void testNbVarianteCSV() {
 		// CSV
@@ -156,6 +159,7 @@ public class VideoGenTestJava1 {
 		}
 	}
 
+	
 	@Test
 	public void testInterpretedModeWithVLC() throws InterruptedException, IOException {
 
@@ -218,6 +222,7 @@ public class VideoGenTestJava1 {
 		}
 	}
 
+	
 	@Test
 	public void testCompiledModeWithFFMPEG() throws InterruptedException, IOException {
 
@@ -299,6 +304,7 @@ public class VideoGenTestJava1 {
 		runCommandInterpretedMode(VLC_BASE_COMMAND + outputName);
 	}
 
+	
 	@Test
 	public void testVarianteDePlusLongueDuree() throws InterruptedException, IOException {
 
@@ -381,6 +387,7 @@ public class VideoGenTestJava1 {
 		System.out.println("Videogen Most Long Variante: " + videoDuration);
 	}
 	
+	
 	@Test
 	public void testFfmpegCompileVariantes() throws IOException {
 		compileVariantes(listeDeToutesLesVariantes());
@@ -418,6 +425,8 @@ public class VideoGenTestJava1 {
 			System.out.println(cmd + "\n");
 		}
 	}
+	
+	
 	@Test
 	public void testFfmpegDureesVariantes() throws IOException {
 		dureesVariantes(listeDeToutesLesVariantes());
@@ -462,6 +471,7 @@ public class VideoGenTestJava1 {
 			runCommandInterpretedMode(command, true);
 		}
 	}
+	
 	
 	@Test
 	public void calculerTaillesVariantes() throws IOException {
@@ -723,6 +733,7 @@ public class VideoGenTestJava1 {
 		return variantes;
 	}
 	
+	
 	@Test
 	public void testPagePourAfficherVignettes() throws IOException {
 		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
@@ -822,6 +833,7 @@ public class VideoGenTestJava1 {
 		Path html = new File("index.html").toPath();
 		Files.write(html,pageHTML,Charset.defaultCharset());
 	}
+	
 	
 	@Test
 	public void testGenerateurDeVignette() {
@@ -939,4 +951,70 @@ public class VideoGenTestJava1 {
 		BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		return output;
 	}
+	
+	
+	
+	@Test
+	public void testErreursVideoGen() throws IOException {
+		VideoGeneratorModel videoGen = new VideoGenHelper().loadVideoGenerator(URI.createURI(INPUT_VIDEOGEN));
+		assertNotNull(videoGen);
+
+		EList<Media> medias = videoGen.getMedias();
+		Map<String, String> listeVideosId = new HashMap<>();
+		
+		for(Media media : medias) {
+			if (media instanceof MandatoryMedia) {
+				MediaDescription description = ((MandatoryMedia) media).getDescription();
+				if (description instanceof VideoDescription) {
+					if (listeVideosId.get(((VideoDescription) description).getVideoid()) == null) {
+					
+						listeVideosId.put(((VideoDescription) description).getVideoid(), 
+								description.getLocation());
+						System.out.println(((VideoDescription) description).getVideoid()+" - "+description.getLocation());
+					}
+					else if (listeVideosId.get(((VideoDescription) description).getVideoid()) 
+							!= description.getLocation()) {
+						System.out.println("L'identifieur " + ((VideoDescription) description).getVideoid()
+									+ " est déjà utilisé !!");
+						assertTrue(false);
+					}
+				}
+			} else if (media instanceof OptionalMedia) {
+				MediaDescription description = ((OptionalMedia) media).getDescription();
+				if (description instanceof VideoDescription) {
+					if (listeVideosId.get(((VideoDescription) description).getVideoid()) == null) {
+						listeVideosId.put(((VideoDescription) description).getVideoid(), description.getLocation());
+						System.out.println(((VideoDescription) description).getVideoid()+" - "+description.getLocation());
+					}
+					else if (listeVideosId.get(((VideoDescription) description).getVideoid()) 
+							!= description.getLocation()) {
+						System.out.println("L'identifieur " + ((VideoDescription) description).getVideoid()
+									+ " est déjà utilisé !!");
+						assertTrue(false);
+					}
+				}
+			} else if (media instanceof AlternativesMedia) {
+				EList<MediaDescription> alternatives = ((AlternativesMedia) media).getMedias();
+				for (MediaDescription selectedMedia : alternatives) {
+					if (selectedMedia instanceof VideoDescription) {
+						if (listeVideosId.get(((VideoDescription) selectedMedia).getVideoid()) == null) {
+							listeVideosId.put(((VideoDescription) selectedMedia).getVideoid(), selectedMedia.getLocation());
+							System.out.println(((VideoDescription) selectedMedia).getVideoid()+" - "+selectedMedia.getLocation());
+						}
+						else if (listeVideosId.get(((VideoDescription) selectedMedia).getVideoid()) 
+								!= selectedMedia.getLocation()) {
+							System.out.println("L'identifieur " + ((VideoDescription) selectedMedia).getVideoid()
+										+ " est déjà utilisé !!");
+							assertTrue(false);
+						}
+					}
+
+				}
+				
+			}
+		}
+		
+	}
+	
+	
 }
